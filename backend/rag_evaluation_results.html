@@ -15,64 +15,56 @@
           }
           body {
               font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-              background-color: #f8fafc;
               color: var(--text-color);
               line-height: 1.6;
               margin: 0;
               padding: 0;
           }
-          .header {
-              background: var(--bg-color);
-              border-bottom: 1px solid var(--border-color);
-              padding: 2rem 1rem;
-              position: sticky;
-              top: 0;
-              z-index: 10;
-              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-          }
-          .header-content {
-              max-width: 1200px;
-              margin: 0 auto;
-              text-align: center;
-          }
-          .header h2 {
-              color: var(--text-color);
-              font-size: 2.25rem;
-              margin: 0 0 1rem;
-              font-weight: 600;
-          }
           .container {
-              max-width: 1200px;
+              width: 100%;
               background: var(--bg-color);
-              border-radius: 12px;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+              border-radius: 8px;
+              overflow: hidden;
           }
-          .section-title {
-              color: var(--primary-color);
-              font-size: 1.5rem;
-              margin-bottom: 1.5rem;
-              font-weight: 600;
+          .table-wrapper {
+              width: 100%;
+              overflow-x: auto;
+              -webkit-overflow-scrolling: touch;
+              margin-bottom: 1rem;
+              border-radius: 8px;
+              box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
           }
           table {
               width: 100%;
               border-collapse: separate;
               border-spacing: 0;
-              margin: 1.5rem 0;
+              margin: 0;
               border: 1px solid var(--border-color);
-              border-radius: 8px;
-              overflow: hidden;
+              min-width: 600px; /* Ensures table doesn't get too squished */
           }
           th, td {
               border: 1px solid var(--border-color);
-              padding: 1rem;
+              padding: 0.75rem;
               text-align: left;
               transition: background-color 0.2s ease;
+              min-width: 120px; /* Minimum column width */
+              word-wrap: break-word;
+              max-width: 300px; /* Maximum column width */
           }
           th {
               background-color: var(--primary-color);
-              color: white;
+              color: white !important; /* Ensure header text is always white */
               font-weight: 500;
               white-space: nowrap;
+              position: sticky;
+              top: 0;
+              z-index: 1;
+          }
+          th:first-child, td:first-child {
+              padding-left: 1.5rem; /* Add extra padding to first column header and cells */
+          }
+          td:first-child {
+              padding-left: 1.5rem; /* Add extra padding to first column */
           }
           tr:nth-child(even) {
               background-color: var(--hover-bg);
@@ -83,14 +75,15 @@
           .metrics {
               background: var(--bg-color);
               border-radius: 8px;
-              padding: 1.5rem;
-              margin-top: 2rem;
+              padding: 1rem;
+              margin-top: 1.5rem;
               border: 1px solid var(--border-color);
           }
           .metrics h3 {
               color: var(--primary-color);
               margin-top: 0;
               font-weight: 500;
+              font-size: 1.1rem;
           }
           .metrics ul {
               list-style: none;
@@ -98,80 +91,81 @@
               margin: 0;
           }
           .metrics li {
-              padding: 0.75rem 0;
+              padding: 0.75rem;
               border-bottom: 1px solid var(--border-color);
               display: flex;
               justify-content: space-between;
               align-items: center;
+              flex-wrap: wrap;
+              gap: 0.5rem;
           }
           .metrics li:last-child {
               border-bottom: none;
           }
-          @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-          }
-          .container {
-              animation: fadeIn 0.5s ease-out;
+          @media (max-width: 640px) {
+              th, td {
+                  padding: 0.5rem;
+                  font-size: 0.875rem;
+              }
+              .metrics li {
+                  padding: 0.5rem;
+              }
+              .metrics h3 {
+                  font-size: 1rem;
+              }
           }
       </style>
     </head>
     <body>
-      <header class="header">
-        <div class="header-content">
-          <h2>RAG Evaluation Results</h2>
-        </div>
-      </header>
       <div class="container">
-        <div class="section-title">Evaluation Results</div>
-        <table>
-          <tr>
-            <th>User Query</th>
-            <th>Generated Response</th>
-            <th>Reference Answer</th>
-          </tr>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>User Query</th>
+                <th>Generated Response</th>
+                <th>Reference Answer</th>
+              </tr>
+            </thead>
+            <tbody>
     
-        <tr>
-          <td>Who introduced the theory of relativity?</td>
-          <td>The theory of relativity was introduced by Albert Einstein in the early 20th century.</td>
-          <td>Albert Einstein proposed the theory of relativity, which transformed our understanding of time, space, and gravity.</td>
-        </tr>
+              <tr>
+                <td>Who introduced the theory of relativity?</td>
+                <td>Albert Einstein introduced the theory of relativity in the early 20th century.</td>
+                <td>Albert Einstein proposed the theory of relativity, which transformed our understanding of time, space, and gravity.</td>
+              </tr>
         
-        <tr>
-          <td>Who was the first computer programmer?</td>
-          <td>Ada Lovelace is often considered the first computer programmer. She wrote the first algorithm intended to be processed by a machine in the mid-19th century for Charles Babbage's Analytical Engine, a mechanical general-purpose computer design.</td>
-          <td>Ada Lovelace is regarded as the first computer programmer for her work on Charles Babbage's early mechanical computer, the Analytical Engine.</td>
-        </tr>
+              <tr>
+                <td>Who was the first computer programmer?</td>
+                <td>Ada Lovelace is often considered to be the first computer programmer. She worked with Charles Babbage on his analytical engine in the mid-1800s and wrote algorithms for the machine, making her one of the first people to recognize the full potential of computers.</td>
+                <td>Ada Lovelace is regarded as the first computer programmer for her work on Charles Babbage's early mechanical computer, the Analytical Engine.</td>
+              </tr>
         
-        <tr>
-          <td>What did Isaac Newton contribute to science?</td>
-          <td>Isaac Newton made numerous contributions to science, including:
-
-1. Formulating the three laws of motion, which describe the relationship between an object's motion, its mass, and the force acting upon it.
-
-2. Developing the law of universal gravitation, which states that every mass attracts every other mass in the universe with a force that is directly proportional to their masses and inversely proportional to the square of the distance between them.
-
-3. Inventing calculus, a branch of mathematics that deals with rates of change and accumulation.
-
-4. Conducting experiments on optics and light, leading to his development of the theory of color and the invention of the reflecting telescope.
-
-5. Making significant contributions to the field of mathematics, including his work on infinite series,</td>
-          <td>Isaac Newton formulated the laws of motion and universal gravitation, laying the foundation for classical mechanics.</td>
-        </tr>
+              <tr>
+                <td>What did Isaac Newton contribute to science?</td>
+                <td>Isaac Newton made numerous contributions to the field of science, including:
+1. Newton's laws of motion: He formulated three laws of motion that describe the relationship between an object's motion and the forces acting on it.
+2. Law of universal gravitation: Newton proposed that every object in the universe is attracted to every other object by a force called gravity, which is proportional to the masses of the objects and inversely proportional to the square of the distance between them.
+3. Calculus: Newton and Gottfried Wilhelm Leibniz independently developed calculus, a branch of mathematics that deals with rates of change and accumulation, which has become a fundamental tool in physics and engineering.
+4. Optics: Newton conducted experiments with light and developed the theory</td>
+                <td>Isaac Newton formulated the laws of motion and universal gravitation, laying the foundation for classical mechanics.</td>
+              </tr>
         
-        <tr>
-          <td>Who won two Nobel Prizes for research on radioactivity?</td>
-          <td>Marie Curie won two Nobel Prizes for her research on radioactivity. She was awarded the Nobel Prize in Physics in 1903 (shared with her husband Pierre Curie and Henri Becquerel) and the Nobel Prize in Chemistry in 1911 for her discovery of the elements polonium and radium.</td>
-          <td>Marie Curie was a physicist and chemist who conducted pioneering research on radioactivity and won two Nobel Prizes.</td>
-        </tr>
+              <tr>
+                <td>Who won two Nobel Prizes for research on radioactivity?</td>
+                <td>Marie Curie</td>
+                <td>Marie Curie was a physicist and chemist who conducted pioneering research on radioactivity and won two Nobel Prizes.</td>
+              </tr>
         
-        <tr>
-          <td>What is the theory of evolution by natural selection?</td>
-          <td>The theory of evolution by natural selection, proposed by Charles Darwin in the 19th century, states that species evolve over time through a process of natural selection. This process occurs when individuals within a population possess certain traits that give them a higher chance of surviving and reproducing in their environment. These advantageous traits are then passed on to future generations, leading to the gradual change and adaptation of species over time. Natural selection is driven by factors such as competition for resources, environmental changes, and genetic variation within populations. This theory is considered one of the most important and well-supported explanations for the diversity of life on Earth.</td>
-          <td>Charles Darwin introduced the theory of evolution by natural selection in his book 'On the Origin of Species'.</td>
-        </tr>
+              <tr>
+                <td>What is the theory of evolution by natural selection?</td>
+                <td>The theory of evolution by natural selection, proposed by Charles Darwin, states that organisms that are better adapted to their environment are more likely to survive and reproduce, passing on their advantageous traits to their offspring. Over time, this process leads to the gradual change and adaptation of species to their environment, ultimately resulting in the diversity of life on Earth. Natural selection acts on variations within a population, favoring those that increase an organism's chances of survival and reproduction. This theory is considered one of the fundamental principles of modern biology.</td>
+                <td>Charles Darwin introduced the theory of evolution by natural selection in his book 'On the Origin of Species'.</td>
+              </tr>
         
-        </table>
+            </tbody>
+          </table>
+        </div>
         <div class="metrics">
           <h3>Evaluation Metrics</h3>
           <ul>

@@ -204,64 +204,56 @@ def evaluate_rag_system(request: EvaluateRequest):
           }
           body {
               font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-              background-color: #f8fafc;
               color: var(--text-color);
               line-height: 1.6;
               margin: 0;
               padding: 0;
           }
-          .header {
-              background: var(--bg-color);
-              border-bottom: 1px solid var(--border-color);
-              padding: 2rem 1rem;
-              position: sticky;
-              top: 0;
-              z-index: 10;
-              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-          }
-          .header-content {
-              max-width: 1200px;
-              margin: 0 auto;
-              text-align: center;
-          }
-          .header h2 {
-              color: var(--text-color);
-              font-size: 2.25rem;
-              margin: 0 0 1rem;
-              font-weight: 600;
-          }
           .container {
-              max-width: 1200px;
+              width: 100%;
               background: var(--bg-color);
-              border-radius: 12px;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+              border-radius: 8px;
+              overflow: hidden;
           }
-          .section-title {
-              color: var(--primary-color);
-              font-size: 1.5rem;
-              margin-bottom: 1.5rem;
-              font-weight: 600;
+          .table-wrapper {
+              width: 100%;
+              overflow-x: auto;
+              -webkit-overflow-scrolling: touch;
+              margin-bottom: 1rem;
+              border-radius: 8px;
+              box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
           }
           table {
               width: 100%;
               border-collapse: separate;
               border-spacing: 0;
-              margin: 1.5rem 0;
+              margin: 0;
               border: 1px solid var(--border-color);
-              border-radius: 8px;
-              overflow: hidden;
+              min-width: 600px; /* Ensures table doesn't get too squished */
           }
           th, td {
               border: 1px solid var(--border-color);
-              padding: 1rem;
+              padding: 0.75rem;
               text-align: left;
               transition: background-color 0.2s ease;
+              min-width: 120px; /* Minimum column width */
+              word-wrap: break-word;
+              max-width: 300px; /* Maximum column width */
           }
           th {
               background-color: var(--primary-color);
-              color: white;
+              color: white !important; /* Ensure header text is always white */
               font-weight: 500;
               white-space: nowrap;
+              position: sticky;
+              top: 0;
+              z-index: 1;
+          }
+          th:first-child, td:first-child {
+              padding-left: 1.5rem; /* Add extra padding to first column header and cells */
+          }
+          td:first-child {
+              padding-left: 1.5rem; /* Add extra padding to first column */
           }
           tr:nth-child(even) {
               background-color: var(--hover-bg);
@@ -272,14 +264,15 @@ def evaluate_rag_system(request: EvaluateRequest):
           .metrics {
               background: var(--bg-color);
               border-radius: 8px;
-              padding: 1.5rem;
-              margin-top: 2rem;
+              padding: 1rem;
+              margin-top: 1.5rem;
               border: 1px solid var(--border-color);
           }
           .metrics h3 {
               color: var(--primary-color);
               margin-top: 0;
               font-weight: 500;
+              font-size: 1.1rem;
           }
           .metrics ul {
               list-style: none;
@@ -287,49 +280,56 @@ def evaluate_rag_system(request: EvaluateRequest):
               margin: 0;
           }
           .metrics li {
-              padding: 0.75rem 0;
+              padding: 0.75rem;
               border-bottom: 1px solid var(--border-color);
               display: flex;
               justify-content: space-between;
               align-items: center;
+              flex-wrap: wrap;
+              gap: 0.5rem;
           }
           .metrics li:last-child {
               border-bottom: none;
           }
-          @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-          }
-          .container {
-              animation: fadeIn 0.5s ease-out;
+          @media (max-width: 640px) {
+              th, td {
+                  padding: 0.5rem;
+                  font-size: 0.875rem;
+              }
+              .metrics li {
+                  padding: 0.5rem;
+              }
+              .metrics h3 {
+                  font-size: 1rem;
+              }
           }
       </style>
     </head>
     <body>
-      <header class="header">
-        <div class="header-content">
-          <h2>RAG Evaluation Results</h2>
-        </div>
-      </header>
       <div class="container">
-        <div class="section-title">Evaluation Results</div>
-        <table>
-          <tr>
-            <th>User Query</th>
-            <th>Generated Response</th>
-            <th>Reference Answer</th>
-          </tr>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>User Query</th>
+                <th>Generated Response</th>
+                <th>Reference Answer</th>
+              </tr>
+            </thead>
+            <tbody>
     """
     for data in dataset:
         html_content += f"""
-        <tr>
-          <td>{data['user_input']}</td>
-          <td>{data['response']}</td>
-          <td>{data['reference']}</td>
-        </tr>
+              <tr>
+                <td>{data['user_input']}</td>
+                <td>{data['response']}</td>
+                <td>{data['reference']}</td>
+              </tr>
         """
     html_content += """
-        </table>
+            </tbody>
+          </table>
+        </div>
         <div class="metrics">
           <h3>Evaluation Metrics</h3>
           <ul>
