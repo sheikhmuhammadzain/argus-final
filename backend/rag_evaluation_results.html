@@ -6,22 +6,130 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>RAG Evaluation Results</title>
       <style>
-          body { font-family: Arial, sans-serif; background-color: #DDE0E4FF; }
-          h2 { text-align: center; }
-          table { width: 100%; border-collapse: collapse; background: #DDE0E4FF; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
-          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-          th { background-color: #007bff; color: white; }
-          tr:nth-child(even) { background-color: #E0E0E0FF; }
+          :root {
+              --primary-color: #007bff;
+              --border-color: #e2e8f0;
+              --bg-color: #ffffff;
+              --text-color: #1a202c;
+              --hover-bg: #f7fafc;
+          }
+          body {
+              font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+              background-color: #f8fafc;
+              color: var(--text-color);
+              line-height: 1.6;
+              margin: 0;
+              padding: 0;
+          }
+          .header {
+              background: var(--bg-color);
+              border-bottom: 1px solid var(--border-color);
+              padding: 2rem 1rem;
+              position: sticky;
+              top: 0;
+              z-index: 10;
+              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          }
+          .header-content {
+              max-width: 1200px;
+              margin: 0 auto;
+              text-align: center;
+          }
+          .header h2 {
+              color: var(--text-color);
+              font-size: 2.25rem;
+              margin: 0 0 1rem;
+              font-weight: 600;
+          }
+          .container {
+              max-width: 1200px;
+              background: var(--bg-color);
+              border-radius: 12px;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          }
+          .section-title {
+              color: var(--primary-color);
+              font-size: 1.5rem;
+              margin-bottom: 1.5rem;
+              font-weight: 600;
+          }
+          table {
+              width: 100%;
+              border-collapse: separate;
+              border-spacing: 0;
+              margin: 1.5rem 0;
+              border: 1px solid var(--border-color);
+              border-radius: 8px;
+              overflow: hidden;
+          }
+          th, td {
+              border: 1px solid var(--border-color);
+              padding: 1rem;
+              text-align: left;
+              transition: background-color 0.2s ease;
+          }
+          th {
+              background-color: var(--primary-color);
+              color: white;
+              font-weight: 500;
+              white-space: nowrap;
+          }
+          tr:nth-child(even) {
+              background-color: var(--hover-bg);
+          }
+          tr:hover td {
+              background-color: rgba(0, 123, 255, 0.05);
+          }
+          .metrics {
+              background: var(--bg-color);
+              border-radius: 8px;
+              padding: 1.5rem;
+              margin-top: 2rem;
+              border: 1px solid var(--border-color);
+          }
+          .metrics h3 {
+              color: var(--primary-color);
+              margin-top: 0;
+              font-weight: 500;
+          }
+          .metrics ul {
+              list-style: none;
+              padding: 0;
+              margin: 0;
+          }
+          .metrics li {
+              padding: 0.75rem 0;
+              border-bottom: 1px solid var(--border-color);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+          }
+          .metrics li:last-child {
+              border-bottom: none;
+          }
+          @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+          }
+          .container {
+              animation: fadeIn 0.5s ease-out;
+          }
       </style>
     </head>
     <body>
-      <h2>RAG Evaluation Results</h2>
-      <table>
-        <tr>
-          <th>User Query</th>
-          <th>Generated Response</th>
-          <th>Reference Answer</th>
-        </tr>
+      <header class="header">
+        <div class="header-content">
+          <h2>RAG Evaluation Results</h2>
+        </div>
+      </header>
+      <div class="container">
+        <div class="section-title">Evaluation Results</div>
+        <table>
+          <tr>
+            <th>User Query</th>
+            <th>Generated Response</th>
+            <th>Reference Answer</th>
+          </tr>
     
         <tr>
           <td>Who introduced the theory of relativity?</td>
@@ -31,43 +139,57 @@
         
         <tr>
           <td>Who was the first computer programmer?</td>
-          <td>Ada Lovelace is often considered the first computer programmer. She was an English mathematician and writer, known for her work on Charles Babbage's proposed mechanical general-purpose computer, the Analytical Engine. Lovelace wrote the first algorithm intended to be carried out by such a machine, making her the world's first computer programmer.</td>
+          <td>Ada Lovelace is often considered the first computer programmer. She wrote the first algorithm intended to be processed by a machine in the mid-19th century for Charles Babbage's Analytical Engine, a mechanical general-purpose computer design.</td>
           <td>Ada Lovelace is regarded as the first computer programmer for her work on Charles Babbage's early mechanical computer, the Analytical Engine.</td>
         </tr>
         
         <tr>
           <td>What did Isaac Newton contribute to science?</td>
-          <td>Isaac Newton made numerous contributions to the field of science, including:
+          <td>Isaac Newton made numerous contributions to science, including:
 
-1. Laws of motion: Newton's three laws of motion laid the foundation for classical mechanics and provided a framework for understanding the motion of objects.
+1. Formulating the three laws of motion, which describe the relationship between an object's motion, its mass, and the force acting upon it.
 
-2. Law of universal gravitation: Newton proposed that every object in the universe attracts every other object with a force that is directly proportional to the product of their masses and inversely proportional to the square of the distance between them.
+2. Developing the law of universal gravitation, which states that every mass attracts every other mass in the universe with a force that is directly proportional to their masses and inversely proportional to the square of the distance between them.
 
-3. Calculus: Newton developed the mathematical field of calculus independently of Gottfried Wilhelm Leibniz. Calculus has become an essential tool in many areas of science and engineering.
+3. Inventing calculus, a branch of mathematics that deals with rates of change and accumulation.
 
-4. Optics: Newton conducted experiments with light and prisms, leading to his discovery that white light is composed of</td>
+4. Conducting experiments on optics and light, leading to his development of the theory of color and the invention of the reflecting telescope.
+
+5. Making significant contributions to the field of mathematics, including his work on infinite series,</td>
           <td>Isaac Newton formulated the laws of motion and universal gravitation, laying the foundation for classical mechanics.</td>
         </tr>
         
         <tr>
           <td>Who won two Nobel Prizes for research on radioactivity?</td>
-          <td>Marie Curie won two Nobel Prizes for her research on radioactivity.</td>
+          <td>Marie Curie won two Nobel Prizes for her research on radioactivity. She was awarded the Nobel Prize in Physics in 1903 (shared with her husband Pierre Curie and Henri Becquerel) and the Nobel Prize in Chemistry in 1911 for her discovery of the elements polonium and radium.</td>
           <td>Marie Curie was a physicist and chemist who conducted pioneering research on radioactivity and won two Nobel Prizes.</td>
         </tr>
         
         <tr>
           <td>What is the theory of evolution by natural selection?</td>
-          <td>The theory of evolution by natural selection was proposed by Charles Darwin in the 19th century. It states that individuals within a population vary in their traits, and those traits that are advantageous for survival and reproduction are more likely to be passed on to future generations. Over time, this process of natural selection leads to the gradual change and adaptation of species to their environments. In other words, organisms that are better suited to their environment are more likely to survive and reproduce, passing on their advantageous traits to their offspring. This theory is the cornerstone of modern evolutionary biology and has been supported by a vast amount of scientific evidence.</td>
+          <td>The theory of evolution by natural selection, proposed by Charles Darwin in the 19th century, states that species evolve over time through a process of natural selection. This process occurs when individuals within a population possess certain traits that give them a higher chance of surviving and reproducing in their environment. These advantageous traits are then passed on to future generations, leading to the gradual change and adaptation of species over time. Natural selection is driven by factors such as competition for resources, environmental changes, and genetic variation within populations. This theory is considered one of the most important and well-supported explanations for the diversity of life on Earth.</td>
           <td>Charles Darwin introduced the theory of evolution by natural selection in his book 'On the Origin of Species'.</td>
         </tr>
         
-      </table>
-      <h3>Evaluation Metrics:</h3>
-      <ul>
-        <li>Context Recall: 0.0</li>
-        <li>Faithfulness: 0.92</li>
-        <li>Factual Correctness: 0.88</li>
-      </ul>
+        </table>
+        <div class="metrics">
+          <h3>Evaluation Metrics</h3>
+          <ul>
+            <li>
+              <span>Context Recall</span>
+              <span>0.0%</span>
+            </li>
+            <li>
+              <span>Faithfulness</span>
+              <span>92.0%</span>
+            </li>
+            <li>
+              <span>Factual Correctness</span>
+              <span>88.0%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </body>
     </html>
     

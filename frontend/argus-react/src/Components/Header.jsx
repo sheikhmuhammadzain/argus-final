@@ -7,9 +7,9 @@ const Header = () => {
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <img src={logo} alt="Cybergen logo" className="h-8 w-auto" />
-          <h1 className="text-xl font-semibold text-gray-800">RAG Evaluation</h1>
+          <h1 className="text-xl font-semibold text-gray-800"> <span className="text-blue-500 font-bold ">RAG </span> Evaluation</h1>
         </div>
-        <div className="text-lg text-gray-700">ARGUS System</div>
+        <div className="text-md text-gray-700/80 ">ARGUS System</div>
       </div>
     </header>
   );
