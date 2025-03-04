@@ -3,9 +3,7 @@ import axios from 'axios';
 import { Button } from './ui/button';
 import { Download } from 'lucide-react';
 
-const API_URL = import.meta.env.MODE === 'production' 
-  ? import.meta.env.VITE_PRODUCTION_API_URL 
-  : import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function QueryComponent() {
   const [ragEndpoint, setRagEndpoint] = useState('');
