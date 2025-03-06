@@ -40,9 +40,9 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://argus-final.vercel.app",  # Your Vercel deployment URL
     "https://*.vercel.app",  # Allow all Vercel domains
     "https://argus-evaluation.vercel.app",  # Your specific Vercel domain
-    "*"  # During development, you can allow all origins
 ]
 
 app.add_middleware(
