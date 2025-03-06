@@ -65,13 +65,13 @@ addMapping('Poppins', 0, 0, 'Poppins')
 addMapping('Poppins', 1, 0, 'Poppins-Bold')
 
 # Configuration constants
-TIMEOUT_SECONDS = 8  # Reduced from 10 to fail faster
-MAX_RETRIES = 2      # Reduced from 3 to fail faster
+TIMEOUT_SECONDS = 15  # Increased from 8 to handle more queries
+MAX_RETRIES = 3      # Increased from 2 to handle more retries
 KNOWN_ENDPOINTS = {
     # Add specific configurations for problematic endpoints
     "10.229.222.15:8000": {
         "note": "Internal endpoint that requires specific params",
-        "timeout": 5,  # Use shorter timeout for this endpoint
+        "timeout": 10,  # Increased timeout for this endpoint
         "params": {
             "groupid": 12,
             "session_id": 111
@@ -90,22 +90,20 @@ def get_endpoint_config(url):
 # Fallback function for non-OpenAI endpoints (original GET method)
 def query_rag(prompt, rag_endpoint, group_id=12, session_id=111, headers=None):
     headers = headers or {}
-    headers.update({"accept": "application/json"})
+    headers.update({
+        "accept": "application/json",
+        "Content-Type": "application/json"
+    })
     
     # Check if this is a known endpoint with specific configuration
     endpoint_config = get_endpoint_config(rag_endpoint)
     
     # Use endpoint-specific params if available
-    params = endpoint_config.get("params", {})
-    if not params:
-        params = {
-            "groupid": group_id,
-            "query": prompt,
-            "session_id": session_id
-        }
-    else:
-        # Merge with default prompt
-        params["query"] = prompt
+    params = {
+        "groupid": group_id,
+        "query": prompt,
+        "session_id": session_id
+    }
     
     # Log attempt details
     logger.info(f"Attempting to query endpoint: {rag_endpoint}", extra={
@@ -121,13 +119,23 @@ def query_rag(prompt, rag_endpoint, group_id=12, session_id=111, headers=None):
             
             logger.info(f"Request attempt {attempt+1}/{MAX_RETRIES} with timeout {current_timeout}s")
             
-            response = requests.get(
-                rag_endpoint,
-                params=params,
-                headers=headers,
-                timeout=current_timeout,
-                verify=False  # Skip SSL verification if needed
-            )
+            # For your specific endpoint, use POST instead of GET
+            if "10.229.222.15:8000" in rag_endpoint:
+                response = requests.post(
+                    rag_endpoint,
+                    json=params,  # Send as JSON body
+                    headers=headers,
+                    timeout=current_timeout,
+                    verify=False  # Skip SSL verification if needed
+                )
+            else:
+                response = requests.get(
+                    rag_endpoint,
+                    params=params,
+                    headers=headers,
+                    timeout=current_timeout,
+                    verify=False  # Skip SSL verification if needed
+                )
             
             # Log the response status and time
             logger.info(f"Response received with status code: {response.status_code}")
@@ -142,13 +150,25 @@ def query_rag(prompt, rag_endpoint, group_id=12, session_id=111, headers=None):
                     "response_type": type(data).__name__
                 })
                 
-                if "answer" in data:
-                    return data["answer"]
+                # For your specific endpoint, extract answer from the response format
+                if "10.229.222.15:8000" in rag_endpoint:
+                    if isinstance(data, dict) and "response" in data:
+                        return data["response"]
+                    else:
+                        logger.warning(f"Unexpected response format: {data}")
+                        return str(data)
+                
+                # For other endpoints, try to find the answer in common fields
+                if isinstance(data, dict):
+                    for key in ["answer", "response", "result", "text", "content"]:
+                        if key in data:
+                            return data[key]
+                    
+                    # If no known fields found, return the whole response
+                    return str(data)
                 else:
-                    available_keys = ", ".join(data.keys()) if isinstance(data, dict) else "no keys (not a dict)"
-                    error_msg = f"No 'answer' field found in response. Available fields: {available_keys}"
-                    logger.warning(error_msg)
-                    return f"Error: {error_msg}"
+                    return str(data)
+                    
             except json.JSONDecodeError:
                 # Not JSON, return as text
                 logger.warning("Response is not valid JSON, returning as text")
@@ -221,7 +241,27 @@ sample_queries = [
     "Who was the first computer programmer?",
     "What did Isaac Newton contribute to science?",
     "Who won two Nobel Prizes for research on radioactivity?",
-    "What is the theory of evolution by natural selection?"
+    "What is the theory of evolution by natural selection?",
+    "Who discovered penicillin?",
+    "What is the Heisenberg uncertainty principle?",
+    "Who developed the first successful polio vaccine?",
+    "What is Schrödinger's cat thought experiment?",
+    "Who formulated the laws of planetary motion?",
+    "What is the significance of the double-slit experiment?",
+    "Who developed the first programmable computer?",
+    "What is the main idea behind quantum mechanics?",
+    "Who discovered the structure of DNA?",
+    "What is the Turing test?",
+    "Who proposed the Big Bang theory?",
+    "What is the significance of Maxwell's equations?",
+    "Who is known as the father of modern chemistry?",
+    "What is Gödel's incompleteness theorem?",
+    "Who invented the World Wide Web?",
+    "What is the photoelectric effect?",
+    "Who discovered the neutron?",
+    "What is Pascal's Triangle?",
+    "Who proposed the heliocentric model of the solar system?",
+    "What is Occam's Razor?"
 ]
 
 expected_responses = [
@@ -229,7 +269,27 @@ expected_responses = [
     "Ada Lovelace is regarded as the first computer programmer for her work on Charles Babbage's early mechanical computer, the Analytical Engine.",
     "Isaac Newton formulated the laws of motion and universal gravitation, laying the foundation for classical mechanics.",
     "Marie Curie was a physicist and chemist who conducted pioneering research on radioactivity and won two Nobel Prizes.",
-    "Charles Darwin introduced the theory of evolution by natural selection in his book 'On the Origin of Species'."
+    "Charles Darwin introduced the theory of evolution by natural selection in his book 'On the Origin of Species'.",
+    "Alexander Fleming discovered penicillin in 1928, leading to the development of antibiotics.",
+    "Werner Heisenberg's uncertainty principle states that it is impossible to simultaneously determine both the position and momentum of a particle with absolute precision.",
+    "Jonas Salk developed the first successful polio vaccine in 1955, significantly reducing polio cases worldwide.",
+    "Schrödinger's cat is a thought experiment in quantum mechanics that illustrates the concept of superposition, where a cat can be both alive and dead until observed.",
+    "Johannes Kepler formulated the three laws of planetary motion, describing the elliptical orbits of planets around the Sun.",
+    "The double-slit experiment demonstrated the wave-particle duality of light and matter, a fundamental concept in quantum mechanics.",
+    "Konrad Zuse developed the Z3 in 1941, considered the first programmable, fully functional computer.",
+    "Quantum mechanics describes the behavior of particles on very small scales, where probabilities govern interactions rather than deterministic laws.",
+    "James Watson and Francis Crick, with contributions from Rosalind Franklin, discovered the double-helix structure of DNA in 1953.",
+    "Alan Turing proposed the Turing test as a way to determine if a machine can exhibit human-like intelligence in conversation.",
+    "Georges Lemaître first proposed the Big Bang theory, explaining the origin of the universe from a singularity.",
+    "Maxwell's equations describe electromagnetism and form the foundation for modern physics, influencing technologies like radio and wireless communication.",
+    "Antoine Lavoisier is known as the father of modern chemistry for establishing the law of conservation of mass and naming oxygen and hydrogen.",
+    "Kurt Gödel's incompleteness theorem states that in any consistent mathematical system, there are true statements that cannot be proven within the system.",
+    "Tim Berners-Lee invented the World Wide Web in 1989, revolutionizing global communication and information sharing.",
+    "Albert Einstein explained the photoelectric effect, demonstrating that light can eject electrons from a material, leading to the development of quantum theory.",
+    "James Chadwick discovered the neutron in 1932, contributing to our understanding of atomic structure.",
+    "Pascal's Triangle is a triangular array of binomial coefficients with applications in algebra, probability, and combinatorics.",
+    "Nicolaus Copernicus proposed the heliocentric model, which placed the Sun at the center of the solar system, challenging the geocentric model.",
+    "Occam's Razor is a philosophical principle suggesting that the simplest explanation that accounts for all evidence is usually the best one."
 ]
 
 # Pydantic model for the single-input request: the RAG API endpoint URL
@@ -251,13 +311,15 @@ def evaluate_rag_system(request: EvaluateRequest):
     rag_endpoint = request.rag_endpoint.strip()
     logger.info(f"Starting evaluation for endpoint: {rag_endpoint}", extra={
         "endpoint_type": request.endpoint_type,
-        "request_method": request.request_method
+        "request_method": request.request_method,
+        "total_queries": len(sample_queries)
     })
     
     # For each sample query, decide which query function to call based on the endpoint type.
     dataset = []
     error_messages = []
     success_count = 0
+    batch_size = 5  # Process queries in batches of 5
     
     try:
         # Validate the endpoint URL
@@ -289,59 +351,68 @@ def evaluate_rag_system(request: EvaluateRequest):
                 status_code=400
             )
         
-        for idx, (query, reference) in enumerate(zip(sample_queries, expected_responses)):
-            try:
-                logger.info(f"Processing query {idx+1}/{len(sample_queries)}: {query[:30]}...")
-                
-                # Choose the appropriate query function based on the endpoint type
-                if request.endpoint_type == "openai" or "openai.com" in rag_endpoint:
-                    response = query_openai(query, rag_endpoint, request.api_key)
-                elif request.endpoint_type == "azure":
-                    response = query_azure(query, rag_endpoint, request.api_key, request.headers)
-                elif request.endpoint_type == "custom" and request.request_format:
-                    response = query_custom(query, rag_endpoint, request.api_key, 
-                                        request.request_method, request.request_format, 
-                                        request.response_path, request.headers)
-                else:
-                    response = query_rag(query, rag_endpoint, headers=request.headers)
-                
-                # Check if the response indicates an error
-                if isinstance(response, str) and response.startswith("Error:"):
-                    error_messages.append(f"Query {idx+1}: {response}")
-                    logger.warning(f"Error in query {idx+1}: {response}")
+        # Process queries in batches
+        for batch_start in range(0, len(sample_queries), batch_size):
+            batch_end = min(batch_start + batch_size, len(sample_queries))
+            batch_queries = sample_queries[batch_start:batch_end]
+            batch_references = expected_responses[batch_start:batch_end]
+            
+            logger.info(f"Processing batch {batch_start//batch_size + 1}/{(len(sample_queries) + batch_size - 1)//batch_size}")
+            
+            for idx, (query, reference) in enumerate(zip(batch_queries, batch_references)):
+                global_idx = batch_start + idx
+                try:
+                    logger.info(f"Processing query {global_idx + 1}/{len(sample_queries)}: {query[:30]}...")
                     
-                    # Add the error response to the dataset
+                    # Choose the appropriate query function based on the endpoint type
+                    if request.endpoint_type == "openai" or "openai.com" in rag_endpoint:
+                        response = query_openai(query, rag_endpoint, request.api_key)
+                    elif request.endpoint_type == "azure":
+                        response = query_azure(query, rag_endpoint, request.api_key, request.headers)
+                    elif request.endpoint_type == "custom" and request.request_format:
+                        response = query_custom(query, rag_endpoint, request.api_key, 
+                                            request.request_method, request.request_format, 
+                                            request.response_path, request.headers)
+                    else:
+                        response = query_rag(query, rag_endpoint, headers=request.headers)
+                    
+                    # Check if the response indicates an error
+                    if isinstance(response, str) and response.startswith("Error:"):
+                        error_messages.append(f"Query {global_idx + 1}: {response}")
+                        logger.warning(f"Error in query {global_idx + 1}: {response}")
+                        
+                        # Add the error response to the dataset
+                        dataset.append({
+                            "user_input": query,
+                            "retrieved_contexts": [response],
+                            "response": response,
+                            "reference": reference,
+                            "status": "error"
+                        })
+                    else:
+                        # Successful response
+                        success_count += 1
+                        # Ensure retrieved_contexts is stored as a list
+                        response_list = [response] if isinstance(response, str) else response
+                        dataset.append({
+                            "user_input": query,
+                            "retrieved_contexts": response_list,
+                            "response": response,
+                            "reference": reference,
+                            "status": "success"
+                        })
+                except Exception as e:
+                    logger.error(f"Exception processing query {global_idx + 1}: {str(e)}", exc_info=True)
+                    error_messages.append(f"Query {global_idx + 1}: Unexpected error: {str(e)}")
+                    
+                    # Add error entry to dataset
                     dataset.append({
                         "user_input": query,
-                        "retrieved_contexts": [response],
-                        "response": response,
+                        "retrieved_contexts": [f"Error: {str(e)}"],
+                        "response": f"Error: {str(e)}",
                         "reference": reference,
                         "status": "error"
                     })
-                else:
-                    # Successful response
-                    success_count += 1
-                    # Ensure retrieved_contexts is stored as a list
-                    response_list = [response] if isinstance(response, str) else response
-                    dataset.append({
-                        "user_input": query,
-                        "retrieved_contexts": response_list,
-                        "response": response,
-                        "reference": reference,
-                        "status": "success"
-                    })
-            except Exception as e:
-                logger.error(f"Exception processing query {idx+1}: {str(e)}", exc_info=True)
-                error_messages.append(f"Query {idx+1}: Unexpected error: {str(e)}")
-                
-                # Add error entry to dataset
-                dataset.append({
-                    "user_input": query,
-                    "retrieved_contexts": [f"Error: {str(e)}"],
-                    "response": f"Error: {str(e)}",
-                    "reference": reference,
-                    "status": "error"
-                })
         
         # If all queries failed, return a more detailed error
         if success_count == 0 and len(error_messages) > 0:
