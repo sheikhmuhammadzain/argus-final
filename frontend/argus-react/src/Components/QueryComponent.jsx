@@ -530,329 +530,327 @@ function QueryComponent() {
   };
 
   return (
-      <motion.div 
-      className="flex flex-col gap-6"
+    <motion.div
       variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+      initial="hidden"
+      animate={controls}
       exit="exit"
+      className="flex flex-col gap-8"
     >
-      {/* Input Section */}
-      <div className="flex flex-col space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            RAG Endpoint URL
-          </label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                value={ragEndpoint}
-                onChange={(e) => setRagEndpoint(e.target.value)}
-                placeholder={endpointType === 'openai' ? "https://api.openai.com/v1/chat/completions" : "https://your-rag-endpoint.com/api"}
-                className="w-full bg-github-darkgray border border-github-border py-2 px-10 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue"
-                disabled={isDemoMode}
-              />
-              {isDemoMode && <div className="absolute right-3 top-1/2 transform -translate-y-1/2 px-2 py-0.5 rounded-sm bg-blue-500/20 text-xs text-blue-400">Demo Mode</div>}
-            </div>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleEvaluate(false)}
-              disabled={loading}
-              className={`px-4 py-2 bg-apple-blue text-white font-medium rounded-md flex items-center justify-center gap-2 transition-colors ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-apple-blue/90'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Evaluating...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  Evaluate
-                </>
-              )}
-            </motion.button>
-            
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={runDemoMode}
-              disabled={loading || isDemoMode}
-              className={`px-3 py-1 border border-blue-500 text-blue-400 font-medium rounded-md flex items-center justify-center gap-1 transition-colors ${
-                loading || isDemoMode ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/10'
-              }`}
-              title="Run a demo evaluation with simulated responses"
-            >
-              <Play className="h-3.5 w-3.5" />
-              Demo
-            </motion.button>
-          </div>
-          {isDemoMode && (
-            <p className="text-xs text-blue-400 mt-1.5">
-              Running in demo mode with simulated responses. {' '}
-              <button 
-                onClick={() => {
-                  setRagEndpoint('');
-                  setIsDemoMode(false);
-                  window.DEMO_MODE = false;
-                }} 
-                className="text-blue-500 hover:underline"
-              >
-                Exit Demo Mode
-              </button>
-            </p>
-          )}
-        </div>
-            
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              API Key {endpointType === 'openai' && <span className="text-xs text-red-400">(Required for OpenAI)</span>}
+      {/* Evaluation Options */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+              <Globe className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+              RAG Endpoint URL
             </label>
-            <div className="relative">
-              <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={endpointType === 'openai' ? "Your OpenAI API key" : "Your API key if required"}
-                className="w-full bg-github-darkgray border border-github-border py-2 px-10 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue"
-              />
-              <Shield className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              value={ragEndpoint}
+              onChange={(e) => setRagEndpoint(e.target.value)}
+              placeholder="https://your-rag-api-endpoint.com/query"
+              className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+              <Key className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+              API Key (Optional)
+            </label>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Your API Key"
+              className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+            />
+          </div>
+          
+          {/* Collapsible Advanced Settings */}
+          <div>
+            <button
+              onClick={toggleAdvanced}
+              className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mt-2"
+            >
+              <Settings className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+              Advanced Settings
+              <ChevronDown className={`h-4 w-4 dark:text-gray-400 text-gray-500 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+            </button>
+            
+            <AnimatePresence>
+              {showAdvanced && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-col gap-4 mt-4 border-t dark:border-github-border border-gray-200 pt-4">
+                    <div className="flex flex-col">
+                      <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+                        <Code className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+                        Endpoint Type
+                      </label>
+                      <select
+                        value={endpointType}
+                        onChange={(e) => setEndpointType(e.target.value)}
+                        className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                      >
+                        <option value="openai" className="dark:bg-github-darkgray bg-white">OpenAI-compatible</option>
+                        <option value="anthropic" className="dark:bg-github-darkgray bg-white">Anthropic-compatible</option>
+                        <option value="custom" className="dark:bg-github-darkgray bg-white">Custom</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+                        <LayoutList className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+                        Request Method
+                      </label>
+                      <select
+                        value={requestMethod}
+                        onChange={(e) => setRequestMethod(e.target.value)}
+                        className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                      >
+                        <option value="POST" className="dark:bg-github-darkgray bg-white">POST</option>
+                        <option value="GET" className="dark:bg-github-darkgray bg-white">GET</option>
+                      </select>
+                    </div>
+                    
+                    {/* More advanced fields based on selected endpointType */}
+                    {endpointType === 'custom' && (
+                      <>
+                        <div className="flex flex-col">
+                          <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+                            <Shield className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+                            Custom Headers (JSON)
+                          </label>
+                          <textarea
+                            value={customHeaders}
+                            onChange={(e) => setCustomHeaders(e.target.value)}
+                            placeholder='{"Authorization": "Bearer YOUR_TOKEN", "Content-Type": "application/json"}'
+                            rows={3}
+                            className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="flex flex-col">
+                          <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+                            <Cpu className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+                            Custom Request Format (JSON)
+                          </label>
+                          <textarea
+                            value={customFormat}
+                            onChange={(e) => setCustomFormat(e.target.value)}
+                            placeholder='{"query": "{{query}}", "options": {"temperature": 0.7}}'
+                            rows={3}
+                            className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                          ></textarea>
+                        </div>
+                      </>
+                    )}
+                    
+                    <div className="flex flex-col">
+                      <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+                        <FileOutput className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+                        Response Path
+                      </label>
+                      <input
+                        type="text"
+                        value={responsePath}
+                        onChange={(e) => setResponsePath(e.target.value)}
+                        placeholder="choices.0.message.content"
+                        className="px-3.5 py-2.5 bg-transparent border dark:border-github-border border-gray-300 rounded-md text-sm dark:text-gray-300 text-gray-800 focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+        
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <label className="flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700 font-medium mb-2">
+              <Beaker className="h-4 w-4 dark:text-gray-400 text-gray-500" />
+              Evaluation Type
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setEvaluationType('simple')}
+                disabled={!isBackendAvailable}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-md transition-colors text-sm font-medium ${
+                  evaluationType === 'simple'
+                    ? 'bg-apple-blue text-white'
+                    : 'dark:bg-github-darkgray/80 bg-gray-100 dark:text-gray-300 text-gray-700 dark:hover:bg-github-darkgray hover:bg-gray-200'
+                } ${!isBackendAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Simple
+              </button>
+              <button
+                onClick={() => setEvaluationType('comprehensive')}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-md transition-colors text-sm font-medium ${
+                  evaluationType === 'comprehensive'
+                    ? 'bg-apple-blue text-white'
+                    : 'dark:bg-github-darkgray/80 bg-gray-100 dark:text-gray-300 text-gray-700 dark:hover:bg-github-darkgray hover:bg-gray-200'
+                }`}
+              >
+                Comprehensive
+              </button>
             </div>
-            {endpointType === 'openai' && (
-              <p className="text-xs text-gray-400 mt-1">
-                For OpenAI endpoints, a valid API key must be provided.
-              </p>
+            
+            <div className="mt-2">
+              <div className="flex items-start gap-2 p-3 rounded-md dark:bg-github-darkgray/80 bg-gray-100 text-xs">
+                <Info className="h-3.5 w-3.5 min-w-[14px] dark:text-gray-400 text-gray-500 mt-0.5" />
+                <div className="dark:text-gray-300 text-gray-700">
+                  {evaluationType === 'simple' 
+                    ? "Simple evaluation runs basic connectivity and response tests against your RAG system."
+                    : "Comprehensive evaluation performs in-depth analysis of response quality, latency, and reliability."}
+                  {!isBackendAvailable && (
+                    <p className="mt-1 text-yellow-500">
+                      <AlertCircle className="h-3.5 w-3.5 inline-block mr-1" />
+                      Backend API not available. Running client-side evaluation only.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3 mt-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleEvaluate()}
+                disabled={loading}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-apple-blue rounded-md font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Evaluating ({progress}%)
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Evaluate RAG System
+                  </>
+                )}
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={loading}
+                onClick={runDemoMode}
+                className="min-w-10 h-10 flex items-center justify-center rounded-md dark:bg-github-darkgray/80 bg-gray-100 border dark:border-github-border border-gray-200 dark:text-gray-300 text-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                title="Run Demo"
+              >
+                <Play className="h-4 w-4" />
+              </motion.button>
+            </div>
+            
+            {reportHtml && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleDownloadReport}
+                disabled={downloadLoading}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 dark:bg-github-darkgray/80 bg-gray-100 border dark:border-github-border border-gray-200 rounded-md font-medium dark:text-white text-gray-700 mt-3 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {downloadLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                Download Report
+              </motion.button>
             )}
           </div>
         </div>
-
-        {/* Evaluation Type */}
-        <div className="flex items-center gap-4 p-3 bg-github-darkgray/50 border border-github-border rounded-md">
-          <div className="text-sm font-medium text-gray-300">Evaluation Type:</div>
-          <div className="flex gap-4">
-            <label className={`flex items-center gap-2 ${!isBackendAvailable ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-              <input
-                type="radio"
-                name="evaluationType"
-                value="simple"
-                checked={evaluationType === 'simple'}
-                onChange={() => setEvaluationType('simple')}
-                disabled={!isBackendAvailable}
-                className="h-4 w-4 text-github-blue focus:ring-github-blue"
-              />
-              <span className="text-sm">Simple Evaluation</span>
-              {!isBackendAvailable && (
-                <span className="text-xs text-yellow-400 ml-1">(Requires backend)</span>
-              )}
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="evaluationType"
-                value="comprehensive"
-                checked={evaluationType === 'comprehensive'}
-                onChange={() => setEvaluationType('comprehensive')}
-                className="h-4 w-4 text-github-blue focus:ring-github-blue"
-              />
-              <div className="flex items-center gap-1">
-                <span className="text-sm">Comprehensive Test Suite</span>
-                <Beaker className="h-4 w-4 text-github-blue" />
-              </div>
-            </label>
-          </div>
-        </div>
-            
-        {/* Advanced Settings Button */}
-        <div>
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={toggleAdvanced}
-            className="group flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-gray-300 transition-colors"
-          >
-            <Settings size={14} className="text-gray-500 group-hover:text-gray-400" />
-            Advanced Configuration
-            <ChevronDown 
-              size={14} 
-              className={`text-gray-500 transition-transform duration-200 ${showAdvanced ? 'rotate-180' : 'rotate-0'}`} 
-            />
-          </motion.button>
-        </div>
-            
-        {/* Advanced Settings */}
-        <AnimatePresence>
-          {showAdvanced && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2 border-t border-github-border pt-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                    Endpoint Type
-                  </label>
-                  <div className="relative">
-                    <Cpu className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <select
-                      value={endpointType}
-                      onChange={(e) => setEndpointType(e.target.value)}
-                      className="w-full bg-github-darkgray border border-github-border py-2 pl-10 pr-4 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue appearance-none"
-                    >
-                      <option value="generic">Generic RAG</option>
-                      <option value="openai">OpenAI compatible</option>
-                      <option value="anthropic">Anthropic compatible</option>
-                      <option value="custom">Custom (specify format)</option>
-                    </select>
-                  </div>
-                </div>
-                        
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                    Request Method
-                  </label>
-                  <div className="relative">
-                    <Code className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <select
-                      value={requestMethod}
-                      onChange={(e) => setRequestMethod(e.target.value)}
-                      className="w-full bg-github-darkgray border border-github-border py-2 pl-10 pr-4 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue appearance-none"
-                    >
-                      <option value="GET">GET</option>
-                      <option value="POST">POST</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                    Response Path
-                  </label>
-                  <div className="relative">
-                    <LayoutList className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={responsePath}
-                      onChange={(e) => setResponsePath(e.target.value)}
-                      placeholder="Field path to extract answer"
-                      className="w-full bg-github-darkgray border border-github-border py-2 px-10 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue"
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Path to extract answer from response (e.g. "answer" or "response.result")
-                  </p>
-                </div>
-                      
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                    Custom Headers (JSON)
-                  </label>
-                  <textarea
-                    value={customHeaders}
-                    onChange={(e) => setCustomHeaders(e.target.value)}
-                    placeholder='{"Authorization": "Bearer YOUR_TOKEN"}'
-                    className="w-full bg-github-darkgray border border-github-border py-2 px-3 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue h-24 font-mono"
-                  />
-                </div>
-
-                {endpointType === 'custom' && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Custom Request Format (JSON)
-                    </label>
-                    <textarea
-                      value={customFormat}
-                      onChange={(e) => setCustomFormat(e.target.value)}
-                      placeholder='{"query": "{{query}}", "options": {"temperature": 0.7}}'
-                      className="w-full bg-github-darkgray border border-github-border py-2 px-3 rounded-md text-white text-sm focus:border-github-blue focus:outline-none focus:ring-1 focus:ring-github-blue h-24 font-mono"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Use {{query}} to specify where the test question should be inserted
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-
-      {/* Progress Bar during evaluation */}
-      {loading && (
-        <div className="w-full">
-          <div className="h-1 w-full bg-github-darkgray rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-github-blue"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ ease: "easeInOut" }}
-            />
-          </div>
-          <div className="flex justify-between mt-1 text-xs text-gray-500">
-            <span>{evaluationType === 'comprehensive' ? 'Running comprehensive test suite...' : 'Evaluating RAG System'}</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-        </div>
-      )}
-
+      
       {/* Results Section */}
-      {reportHtml && (
-        <div className="flex flex-col gap-4 mt-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium text-white">Evaluation Results</h3>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={handleDownloadReport}
-              disabled={downloadLoading}
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-md bg-github-darkgray border border-github-border hover:bg-github-darkgray/80 text-white transition-colors ${
-                downloadLoading ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
-            >
-              {downloadLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FileOutput className="h-4 w-4" />
-              )}
-              {downloadLoading ? 'Creating Report...' : 'Download HTML Report'}
-            </motion.button>
-          </div>
-          
-          <div className="bg-github-darkgray border border-github-border rounded-md p-4">
-            <div className="prose prose-sm max-w-none prose-invert" dangerouslySetInnerHTML={{ __html: reportHtml }} />
-          </div>
-        </div>
-      )}
-          
-      {/* Info card at the bottom */}
-      <div className="flex items-start gap-3 p-4 bg-github-darkgray/60 border border-github-border rounded-md mt-2">
-        <div className="mt-0.5">
-          <Info className="h-5 w-5 text-github-blue" />
-        </div>
-        <div>
-          <h4 className="text-sm font-medium text-white mb-1">About RAG Evaluation</h4>
-          <p className="text-sm text-gray-400">
-            {evaluationType === 'comprehensive' 
-              ? "The comprehensive test suite evaluates your RAG system across multiple categories including factual knowledge, reasoning, hallucination detection, and more. Results include detailed metrics for each test case."
-              : "The ARGUS evaluation platform assesses your RAG system's performance by submitting test questions, comparing responses to ground truth answers, and evaluating key metrics like accuracy, relevance, and hallucination detection."
-            }
-          </p>
-          {!isBackendAvailable && !isDemoMode && (
-            <p className="text-xs text-yellow-400 mt-2">
-              Backend server not detected. Running in browser-only mode using the Comprehensive Test Suite.
-            </p>
-          )}
-          {isDemoMode && (
-            <p className="text-xs text-blue-400 mt-2">
-              You're in demo mode with simulated responses. To evaluate a real endpoint, exit demo mode and enter your RAG endpoint URL.
-            </p>
-          )}
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        {reportHtml ? (
+          <motion.div
+            key="results"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="flex flex-col gap-6"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-medium dark:text-white text-gray-900">Evaluation Results</h3>
+              <span className="text-sm dark:text-gray-400 text-gray-500">
+                <FileText className="h-4 w-4 inline mr-1" />
+                {evaluationType === 'simple' ? 'Basic Report' : 'Comprehensive Analysis'}
+              </span>
+            </div>
+            
+            <div className="prose prose-sm dark:prose-invert max-w-none p-6 border dark:border-github-border border-gray-200 rounded-md dark:bg-github-darkgray/60 bg-white/80 overflow-auto">
+              <div 
+                dangerouslySetInnerHTML={{ __html: reportHtml }} 
+                className="min-h-[300px] max-h-[600px] overflow-auto"
+              />
+            </div>
+          </motion.div>
+        ) : loading ? (
+          <motion.div
+            key="loading"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="flex flex-col items-center justify-center gap-6 py-12"
+          >
+            <div className="relative h-32 w-32">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="h-full w-full" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    className="text-gray-200"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeLinecap="round"
+                    className="text-apple-blue"
+                    strokeDasharray={`${2 * Math.PI * 40 * progress / 100} ${2 * Math.PI * 40 * (100 - progress) / 100}`}
+                    transform="rotate(-90 50 50)"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-bold dark:text-white text-gray-900">{progress}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-medium dark:text-white text-gray-900 mb-2">Evaluating RAG System</h3>
+              <p className="text-sm dark:text-gray-400 text-gray-600 max-w-md">
+                {evaluationType === 'comprehensive' ? 
+                  <TypeWriter text="Running comprehensive analysis of your system. This includes response quality, latency tests, and reliability metrics..." /> :
+                  <TypeWriter text="Testing connectivity and basic responses from your RAG endpoint..." />
+                }
+              </p>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }

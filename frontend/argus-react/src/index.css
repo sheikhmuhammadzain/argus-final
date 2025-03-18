@@ -4,6 +4,40 @@
 
 @layer base {
   :root {
+    /* Light mode colors */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 209 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 209 100% 50%;
+    
+    --radius: 0.5rem;
+  }
+  
+  .dark {
+    /* Dark mode colors */
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;
     
@@ -31,8 +65,6 @@
     --border: 0 0% 15%;
     --input: 0 0% 15%;
     --ring: 212 100% 47%;
-    
-    --radius: 0.5rem;
   }
 
   * {
@@ -40,7 +72,7 @@
   }
   
   body {
-    @apply bg-[#000000] text-[#f8f8f8] antialiased;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
@@ -66,13 +98,13 @@
 @layer components {
   /* Apple-inspired button */
   .btn-apple {
-    @apply px-5 py-2.5 rounded-full bg-[#0066cc] text-white font-medium transition-all duration-300;
+    @apply px-5 py-2.5 rounded-full bg-apple-blue text-white font-medium transition-all duration-300;
     @apply hover:bg-[#0077ed] active:bg-[#0055b3];
   }
   
   /* GitHub-inspired card */
   .card-github {
-    @apply bg-[#0d1117] border border-[#30363d] rounded-md;
+    @apply bg-card border border-border rounded-md;
   }
   
   /* Apple-inspired gradient text */
@@ -87,6 +119,6 @@
   
   /* Glass effect */
   .glass {
-    @apply bg-black/20 backdrop-blur-md border border-white/10 rounded-lg;
+    @apply dark:bg-black/20 bg-white/60 backdrop-blur-md border dark:border-white/10 border-black/5 rounded-lg;
   }
 }
