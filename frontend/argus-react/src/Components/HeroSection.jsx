@@ -29,16 +29,16 @@ const HeroSection = ({ onStartEvaluation }) => {
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col space-y-3">
               <div className="flex items-center gap-2 mb-3">
-                <div className="px-3 py-1 rounded-full bg-github-darkgray border border-github-border text-xs font-medium text-github-blue">
+                <div className="px-3 py-1 rounded-full dark:bg-github-darkgray bg-gray-100 border dark:border-github-border border-gray-200 text-xs font-medium dark:text-github-blue text-apple-blue">
                   Enterprise RAG Analytics
                 </div>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-balance text-white">
-                Advanced <span className="text-github-blue">RAG</span> Evaluation Platform
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight text-balance dark:text-white text-gray-900">
+                Advanced <span className="dark:text-github-blue text-apple-blue">RAG</span> Evaluation Platform
               </h1>
               
-              <p className="text-lg text-gray-400 mt-4 max-w-xl text-pretty">
+              <p className="text-lg dark:text-gray-400 text-gray-600 mt-4 max-w-xl text-pretty">
                 Comprehensive analytics and performance metrics for Retrieval Augmented Generation systems.
               </p>
             </div>
@@ -48,7 +48,7 @@ const HeroSection = ({ onStartEvaluation }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onStartEvaluation}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-github-blue rounded-md font-medium text-white"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-apple-blue rounded-md font-medium text-white"
               >
                 Start Evaluation
                 <ArrowRight className="h-4 w-4" />
@@ -57,13 +57,13 @@ const HeroSection = ({ onStartEvaluation }) => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center justify-center px-5 py-2.5 bg-github-darkgray border border-github-border rounded-md font-medium text-white"
+                className="flex items-center justify-center px-5 py-2.5 dark:bg-github-darkgray bg-gray-100 border dark:border-github-border border-gray-200 rounded-md font-medium dark:text-white text-gray-700"
               >
                 Learn More
               </motion.button>
             </div>
             
-            <div className="hidden lg:flex items-center gap-4 text-sm text-gray-500">
+            <div className="hidden lg:flex items-center gap-4 text-sm dark:text-gray-500 text-gray-600">
               <div className="flex items-center gap-1.5">
                 <div className="h-1 w-1 rounded-full bg-green-500"></div>
                 <span>99.9% Accuracy</span>
@@ -87,15 +87,15 @@ const HeroSection = ({ onStartEvaluation }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 + 0.2 }}
-                className="card-github p-6 rounded-lg border border-github-border hover:border-github-blue/50 transition-colors duration-200"
+                className="card-github p-6 rounded-lg border dark:border-github-border border-gray-200 dark:hover:border-github-blue/50 hover:border-apple-blue/50 transition-colors duration-200"
               >
                 <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-md bg-github-darkgray">
-                    <feature.icon className="h-5 w-5 text-github-blue" />
+                  <div className="p-2 rounded-md dark:bg-github-darkgray bg-gray-100">
+                    <feature.icon className="h-5 w-5 dark:text-github-blue text-apple-blue" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-white mb-1">{feature.title}</h3>
-                    <p className="text-sm text-gray-400">{feature.description}</p>
+                    <h3 className="text-lg font-medium dark:text-white text-gray-900 mb-1">{feature.title}</h3>
+                    <p className="text-sm dark:text-gray-400 text-gray-600">{feature.description}</p>
                   </div>
                 </div>
               </motion.div>
