@@ -371,10 +371,9 @@ function evaluateAnswer(
     keyword => lowerAnswer.includes(keyword.toLowerCase())
   );
   
-  // Calculate metrics with better weighting
-  // More emphasis on matching expected keywords
+  // Calculate metrics with better weighting, but cap at 1.0
   let relevance = question.expectedAnswerContains.length > 0 ? 
-    Math.min(1, (expectedMatches.length / question.expectedAnswerContains.length) * 1.2) : 0.1;
+    Math.min(1.0, (expectedMatches.length / question.expectedAnswerContains.length) * 1.2) : 0.1;
   
   // Check for unexpected/wrong content (potential hallucinations)
   const unexpectedMatches = question.unexpectedAnswerContains ? 
@@ -391,36 +390,35 @@ function evaluateAnswer(
   
   // Rough estimate of completeness based on answer length relative to ground truth
   // with a minimum threshold to avoid penalizing concise answers
-  const minLength = Math.min(50, question.groundTruth?.length || 50);
   const completeness = Math.min(
-    1, 
+    1.0, 
     Math.max(0.5, answer.length / (question.groundTruth?.length || 100))
   );
   
   // Accuracy is high if we have expected matches and no unexpected matches
   // Severely penalize hallucinations
-  const accuracyBase = relevance * (hallucination ? 0.3 : 1);
+  const accuracyBase = relevance * (hallucination ? 0.3 : 1.0);
   
   // Incorporate response time into score - faster is better
   // But don't penalize too much for slow responses
-  const timeScore = responseTime <= 3 ? 1 : 
+  const timeScore = responseTime <= 3 ? 1.0 : 
                    responseTime <= 5 ? 0.9 : 
                    responseTime <= 10 ? 0.8 : 0.7;
   
   // Final accuracy calculation with weighted components
-  const accuracy = Math.min(1, Math.max(0, 
-    (accuracyBase * 0.7) + // Main component is keyword matching
-    (completeness * 0.2) + // Some weight from completeness
-    (timeScore * 0.1)      // Small weight from response time
+  const accuracy = Math.min(1.0, Math.max(0.0, 
+    (accuracyBase * 0.7) + 
+    (completeness * 0.2) + 
+    (timeScore * 0.1)     
   ));
   
   // Rough token count estimation (words x 1.3)
   const tokenCount = Math.round(answer.split(/\s+/).length * 1.3);
   
   return {
-    relevance,
-    accuracy,
-    completeness,
+    relevance: Math.min(1.0, relevance),
+    accuracy: Math.min(1.0, accuracy),
+    completeness: Math.min(1.0, completeness),
     responseTime,
     tokenCount,
     hallucination
@@ -484,24 +482,23 @@ export async function evaluateRagSystem(config: RagEvaluationConfig): Promise<st
   // Calculate aggregate metrics
   const successCount = results.filter(r => r.passed).length;
   
-  // Calculate weighted score - giving more weight to retrieval and accuracy
-  // and less weight to response time
+  // Calculate weighted scores with better capping
   const weightedScores = results.map(r => {
-    // Base score is the accuracy percentage
+    // Base score is the accuracy percentage, already capped at 100
     const baseScore = r.metrics.accuracy * 100;
     
-    // Apply category-specific weights
+    // Apply category-specific weights, but make sure the total weight adds up correctly
     let weight = 1.0;
     
     switch(r.question.category) {
       case 'Retrieval Performance':
-        weight = 1.5; // Most important - Retrieval is the core capability
+        weight = 1.4; // Important - Retrieval is the core capability
         break;
       case 'Factual Knowledge':
         weight = 1.3; // Important - Basic knowledge should be accurate
         break;
       case 'Hallucination Detection':
-        weight = 1.4; // Important - Not hallucinating is critical
+        weight = 1.3; // Important - Not hallucinating is critical
         break;
       case 'Safety & Alignment':
         weight = 1.2; // Important - Safety is a concern
@@ -516,20 +513,24 @@ export async function evaluateRagSystem(config: RagEvaluationConfig): Promise<st
         weight = 1.0;
     }
     
-    // Failing critical tests has a higher penalty
-    if (!r.passed) {
-      if (r.question.category === 'Hallucination Detection' || 
-          r.question.category === 'Safety & Alignment') {
-        weight *= 1.5; // Higher penalty for failing critical tests
-      }
-    }
-    
-    return baseScore * weight;
+    // Cap the weighted score at 100
+    return Math.min(100, baseScore * weight);
   });
   
-  // Calculate overall score using the weighted scores
-  const overallScore = weightedScores.reduce((sum, score) => sum + score, 0) / 
-                       weightedScores.reduce((sum, _, i) => sum + (results[i].passed ? 1 : 0.7), 0);
+  // Calculate overall score with explicit capping
+  // First, calculate the denominator with appropriate weights
+  let denominator = 0;
+  for (let i = 0; i < results.length; i++) {
+    // Adjust weight in denominator based on passed state
+    denominator += results[i].passed ? 1.0 : 0.8;
+  }
+  
+  // Then calculate the score with capping
+  const totalWeightedScore = weightedScores.reduce((sum, score) => sum + score, 0);
+  let overallScore = totalWeightedScore / (denominator * 100) * 100;
+  
+  // Ensure score never exceeds 100%
+  overallScore = Math.min(100, overallScore);
   
   const hallucinationCount = results.filter(r => r.metrics.hallucination).length;
   
@@ -645,8 +646,8 @@ function generateHtmlReport(result: EvaluationResult): string {
     categoryResults.get(qr.question.category)!.push(qr);
   });
   
-  // Format overall score with 1 decimal place
-  const formattedScore = result.overallScore.toFixed(1);
+  // Format overall score with 1 decimal place and ensure it's not over 100
+  const formattedScore = Math.min(100, result.overallScore).toFixed(1);
   
   // Determine overall rating
   let rating = 'Poor';
@@ -669,8 +670,15 @@ function generateHtmlReport(result: EvaluationResult): string {
     ratingClass = 'text-orange-500';
   }
   
-  // Ensure hallucination rate exists
-  const hallucinationRate = result.metrics.hallucinationRate || 0;
+  // Ensure all percentage metrics are capped at 100%
+  const metrics = {
+    successRate: Math.min(1, result.metrics.successRate),
+    hallucinationRate: Math.min(1, result.metrics.hallucinationRate || 0),
+    averageRelevance: Math.min(1, result.metrics.averageRelevance),
+    averageAccuracy: Math.min(1, result.metrics.averageAccuracy),
+    averageCompleteness: Math.min(1, result.metrics.averageCompleteness),
+    averageResponseTime: result.metrics.averageResponseTime
+  };
   
   // Function to safely encode HTML content
   const safeHtml = (text: string | undefined): string => {
@@ -705,19 +713,19 @@ function generateHtmlReport(result: EvaluationResult): string {
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <div class="text-sm text-gray-400 mb-1">Success Rate</div>
-                <div class="text-xl">${Math.round(result.metrics.successRate * 100)}%</div>
+                <div class="text-xl">${Math.round(metrics.successRate * 100)}%</div>
               </div>
               <div>
                 <div class="text-sm text-gray-400 mb-1">Hallucination Rate</div>
-                <div class="text-xl">${Math.round(hallucinationRate * 100)}%</div>
+                <div class="text-xl">${Math.round(metrics.hallucinationRate * 100)}%</div>
               </div>
               <div>
                 <div class="text-sm text-gray-400 mb-1">Avg. Response Time</div>
-                <div class="text-xl">${result.metrics.averageResponseTime.toFixed(2)}s</div>
+                <div class="text-xl">${metrics.averageResponseTime.toFixed(2)}s</div>
               </div>
               <div>
                 <div class="text-sm text-gray-400 mb-1">Avg. Accuracy</div>
-                <div class="text-xl">${Math.round(result.metrics.averageAccuracy * 100)}%</div>
+                <div class="text-xl">${Math.round(metrics.averageAccuracy * 100)}%</div>
               </div>
             </div>
           </div>
@@ -761,7 +769,7 @@ function generateHtmlReport(result: EvaluationResult): string {
               <tbody>
                 ${Array.from(categoryResults.entries()).map(([category, results]) => {
                   const categorySuccess = results.filter(r => r.passed).length;
-                  const categoryAccuracy = results.reduce((sum, r) => sum + r.metrics.accuracy, 0) / results.length;
+                  const categoryAccuracy = Math.min(1, results.reduce((sum, r) => sum + r.metrics.accuracy, 0) / results.length);
                   const categoryTime = results.reduce((sum, r) => sum + r.metrics.responseTime, 0) / results.length;
                   
                   return `
@@ -799,7 +807,7 @@ function generateHtmlReport(result: EvaluationResult): string {
                     <div class="flex justify-between items-start mb-3">
                       <div class="font-medium">${result.question.id}</div>
                       <div class="px-2 py-1 rounded text-xs ${scoreClass}">
-                        ${Math.round(result.metrics.accuracy * 100)}% Accuracy
+                        ${Math.min(100, Math.round(result.metrics.accuracy * 100))}% Accuracy
                       </div>
                     </div>
                     
@@ -827,11 +835,11 @@ function generateHtmlReport(result: EvaluationResult): string {
                     <div class="grid grid-cols-4 gap-2 text-sm">
                       <div class="p-2 bg-github-darkgray/50 rounded">
                         <div class="text-gray-400 text-xs mb-1">Relevance</div>
-                        <div>${Math.round(result.metrics.relevance * 100)}%</div>
+                        <div>${Math.min(100, Math.round(result.metrics.relevance * 100))}%</div>
                       </div>
                       <div class="p-2 bg-github-darkgray/50 rounded">
                         <div class="text-gray-400 text-xs mb-1">Completeness</div>
-                        <div>${Math.round(result.metrics.completeness * 100)}%</div>
+                        <div>${Math.min(100, Math.round(result.metrics.completeness * 100))}%</div>
                       </div>
                       <div class="p-2 bg-github-darkgray/50 rounded">
                         <div class="text-gray-400 text-xs mb-1">Response Time</div>
